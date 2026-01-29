@@ -19,5 +19,6 @@ module-name = "bm25"
 [dependency-groups]
 dev = [
     "maturin>=1.11.5",
+    "pytest>=8.0",
     "ruff>=0.14.14",
 ]
