@@ -70,7 +70,8 @@ pub struct BM25 {
     corpus_size: usize,
     avgdl: f64,
     index: HashMap<String, InvertedList>,
-    doc_lengths: Vec<u32>, // 全局文档长度，也可以存储在 Block 中优化局部性
+    doc_lengths: Vec<u32>, // 全局文档长度
+    doc_ids: Vec<u64>,     // 映射: 内部ID(usize) -> 外部ID(u64)
 }
 
 #[pymethods]
@@ -87,14 +88,35 @@ impl BM25 {
             avgdl: 0.0,
             index: HashMap::new(),
             doc_lengths: Vec::new(),
+            doc_ids: Vec::new(),
         }
     }
 
     /// 使用文档语料库训练 BM25 模型
-    pub fn fit(&mut self, documents: Vec<String>) {
+    ///
+    /// documents: 文档内容列表
+    /// ids: 可选的文档 ID 列表 (必须与 documents 长度一致)
+    #[pyo3(signature = (documents, ids=None))]
+    pub fn fit(&mut self, documents: Vec<String>, ids: Option<Vec<u64>>) -> PyResult<()> {
+        if let Some(ref external_ids) = ids {
+            if external_ids.len() != documents.len() {
+                return Err(pyo3::exceptions::PyValueError::new_err(
+                    "documents and ids must have the same length",
+                ));
+            }
+        }
+
         self.corpus_size = documents.len();
         self.index.clear();
         self.doc_lengths.clear();
+        self.doc_ids.clear();
+
+        // 初始化 ID 映射
+        if let Some(external_ids) = ids {
+            self.doc_ids = external_ids;
+        } else {
+            self.doc_ids = (0..self.corpus_size as u64).collect();
+        }
 
         let mut temp_index: HashMap<String, Vec<(u32, u32, u32)>> = HashMap::new();
         let mut total_length: u64 = 0;
@@ -163,11 +185,13 @@ impl BM25 {
 
             self.index.insert(term, inverted_list);
         }
+        Ok(())
     }
 
     /// 搜索与查询最相关的文档 (Block-Max WAND)
+    /// 返回: List[(doc_id, score)]，其中 doc_id 是外部 ID (u64)
     #[pyo3(signature = (query, top_k=None))]
-    pub fn search(&self, query: &str, top_k: Option<usize>) -> Vec<(usize, f64)> {
+    pub fn search(&self, query: &str, top_k: Option<usize>) -> Vec<(u64, f64)> {
         let k = top_k.unwrap_or(10); // 默认 Top 10
         let query_tokens = self.tokenize(query);
         let mut heap = BinaryHeap::new(); // 最小堆，保存 Top-K
@@ -188,17 +212,7 @@ impl BM25 {
         }
 
         // 简化的 BMW/WAND 逻辑
-        // 这是一个简单的 Union 实现，带有 Block 级剪枝
-        // 真正的 WAND 需要按照 doc_id 对齐游标，为了代码简洁性，
-        // 这里实现一个 "Block-At-A-Time" 的变体，利用 Block.max_score 进行剪枝
-
-        // 初始化所有游标
         let mut active_cursors: Vec<&mut BlockCursor> = cursors.iter_mut().collect();
-
-        // 我们遍历所有文档 ID 空间，利用 Skip List 跳跃
-        // 但由于是在 Application 层实现，我们这里采用一种更直观的策略：
-        // 轮询所有 cursor，找出当前最小的 doc_id，计算分数
-        // 如果某个 Block 的 max_score 都不足以进入堆，就直接跳过该 Block
 
         loop {
             // 1. 找出当前所有 cursor 中最小的 doc_id
@@ -219,10 +233,7 @@ impl BM25 {
             }
 
             // 2. 剪枝检查
-            // 如果堆已满，计算当前 min_doc_id 可能的最大分数上限
-            // 这里为了简化，我们暂时只在 Block 切换时做剪枝（由 Cursor 内部逻辑控制）
-            // 严格的 WAND 需要在这里计算 pivot 和 threshold。
-            // 鉴于 Python 绑定的开销，只要有了倒排索引，性能已经提升巨大。
+            // TODO: WAND threshold check
 
             // 3. 计算 min_doc_id 的准确分数
             let mut score = 0.0;
@@ -239,7 +250,6 @@ impl BM25 {
             }
 
             if !advanced_any {
-                // Should not happen if min_doc_id is valid
                 break;
             }
 
@@ -261,12 +271,20 @@ impl BM25 {
         }
 
         // 结果排序 (分数降序)
-        let results: Vec<(usize, f64)> = heap
+        let results: Vec<(u64, f64)> = heap
             .into_sorted_vec()
             .into_iter()
-            .map(|d| (d.doc_id as usize, d.score))
+            .map(|d| {
+                // 映射回外部 ID
+                let internal_id = d.doc_id as usize;
+                let external_id = if internal_id < self.doc_ids.len() {
+                    self.doc_ids[internal_id]
+                } else {
+                    internal_id as u64 // Fallback, shout not happen
+                };
+                (external_id, d.score)
+            })
             .collect();
-        // results.reverse(); // Ord is inverted, into_sorted_vec returns Descending order (High Score first)
 
         results
     }
