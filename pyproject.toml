@@ -22,3 +22,7 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.14.14",
 ]
+validation = [
+    "rank-bm25>=0.2.2",
+    "jieba>=0.42.1",
+]
