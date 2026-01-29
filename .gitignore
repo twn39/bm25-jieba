@@ -17,3 +17,5 @@ Cargo.lock
 *.so
 *.pyd
 *.dylib
+
+.idea
