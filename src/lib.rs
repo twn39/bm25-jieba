@@ -3,8 +3,8 @@
 //! 使用 jieba-rs 进行中文分词，纯 Rust 实现 BM25 算法
 //! 通过 PyO3 提供 Python 绑定
 
-use pyo3::prelude::*;
 use jieba_rs::Jieba;
+use pyo3::prelude::*;
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
@@ -182,7 +182,7 @@ impl BM25 {
 
 /// Python 模块定义
 #[pymodule]
-fn bm25(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn bm25_jieba(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<BM25>()?;
     Ok(())
 }

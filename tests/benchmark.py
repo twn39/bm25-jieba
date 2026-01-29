@@ -7,7 +7,7 @@ BM25 性能测试
 import time
 import random
 import string
-from bm25 import BM25
+from bm25_jieba import BM25
 
 
 def generate_chinese_text(length: int = 50) -> str:

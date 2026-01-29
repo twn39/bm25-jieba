@@ -1,10 +1,10 @@
 [project]
-name = "bm25"
+name = "bm25-jieba"
 version = "0.1.0"
 description = "BM25 中文文本搜索算法 (Rust 实现)"
 readme = "README.md"
 authors = [
-    { name = "curry tang", email = "curry_tang@apple.com" }
+    { name = "curry tang", email = "twn39@163.com" }
 ]
 requires-python = ">=3.12"
 
@@ -14,7 +14,7 @@ build-backend = "maturin"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
-module-name = "bm25"
+module-name = "bm25_jieba"
 
 [dependency-groups]
 dev = [

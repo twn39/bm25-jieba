@@ -1,10 +1,10 @@
 [package]
-name = "bm25"
+name = "bm25-jieba"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "bm25"
+name = "bm25_jieba"
 crate-type = ["cdylib"]
 
 [dependencies]

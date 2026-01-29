@@ -2,7 +2,7 @@
 BM25 中文文本搜索示例
 """
 
-from bm25 import BM25
+from bm25_jieba import BM25
 
 
 def main():

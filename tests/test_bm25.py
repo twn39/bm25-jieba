@@ -3,7 +3,7 @@ BM25 中文搜索测试
 """
 
 import pytest
-from bm25 import BM25
+from bm25_jieba import BM25
 
 
 class TestBM25:

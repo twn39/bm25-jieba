@@ -1,4 +1,4 @@
-# BM25 中文文本搜索
+# BM25-Jieba 中文文本搜索
 
 基于 Rust + PyO3 的高性能 BM25 中文文本搜索库，使用 jieba-rs 进行中文分词。
 
@@ -23,7 +23,7 @@ pip install target/wheels/*.whl
 ## 快速开始
 
 ```python
-from bm25 import BM25
+from bm25_jieba import BM25
 
 # 准备文档
 documents = [
@@ -106,11 +106,13 @@ uv run python tests/benchmark.py
 
 ## 算法验证
 
+测试语料库：19 个文档，6 个查询
+
 | 验证项 | 结果 | 说明 |
 |--------|------|------|
 | 公式正确性 | ✅ | 手动计算与实现一致 |
-| 排序一致性 | ✅ | 与 rank-bm25 排序相同 |
-| 绝对分数 | ⚠️ | 因分词器差异略有不同 |
+| 排序一致性 | ✅ | 6/6 查询与 rank-bm25 排序完全一致 |
+| 绝对分数 | ⚠️ | 因 IDF +1 修正略有差异（符合预期） |
 
 ```bash
 # 运行验证
