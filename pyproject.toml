@@ -1,12 +1,42 @@
 [project]
 name = "bm25-jieba"
 version = "0.1.0"
-description = "BM25 中文文本搜索算法 (Rust 实现)"
+description = "High-performance BM25 Chinese text search with jieba-rs tokenizer (Rust implementation)"
 readme = "README.md"
+license = { text = "MIT" }
 authors = [
     { name = "curry tang", email = "twn39@163.com" }
 ]
 requires-python = ">=3.12"
+keywords = [
+    "bm25",
+    "chinese",
+    "search",
+    "nlp",
+    "text-search",
+    "jieba",
+    "information-retrieval",
+    "rust",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Indexing",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+[project.urls]
+Homepage = "https://github.com/twn39/bm25-jieba"
+Repository = "https://github.com/twn39/bm25-jieba"
+Issues = "https://github.com/twn39/bm25-jieba/issues"
 
 [build-system]
 requires = ["maturin>=1.11,<2"]
