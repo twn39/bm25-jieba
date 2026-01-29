@@ -3,6 +3,8 @@
 [![PyPI version](https://img.shields.io/pypi/v/bm25-jieba.svg)](https://pypi.org/project/bm25-jieba/)
 [![Python](https://img.shields.io/pypi/pyversions/bm25-jieba.svg)](https://pypi.org/project/bm25-jieba/)
 [![License](https://img.shields.io/pypi/l/bm25-jieba.svg)](https://github.com/twn39/bm25-jieba/blob/main/LICENSE)
+[![Build](https://github.com/twn39/bm25-jieba/actions/workflows/release.yml/badge.svg)](https://github.com/twn39/bm25-jieba/actions)
+[![Downloads](https://img.shields.io/pypi/dm/bm25-jieba.svg)](https://pypi.org/project/bm25-jieba/)
 
 基于 Rust + PyO3 的高性能 BM25 中文文本搜索库，使用 jieba-rs 进行中文分词。
 
@@ -11,7 +13,7 @@
 - 🚀 **高性能**: Rust 实现，比纯 Python 快数倍
 - 🔤 **中文分词**: 内置 jieba-rs 分词器
 - 🎯 **精确搜索**: 经典 BM25 算法
-- 🐍 **Python API**: 简洁易用的接口
+- 🐍 **Python 3.11 ~ 3.14**: 支持最新 Python 版本
 
 ## 安装
 
