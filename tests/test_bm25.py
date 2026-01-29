@@ -131,3 +131,51 @@ class TestBM25Scoring:
         scores = bm25.get_scores("Python")
         # 词频更高的文档分数更高（但受 k1 饱和限制）
         assert scores[1] > scores[0]
+
+
+class TestBM25CaseInsensitive:
+    """BM25 大小写不敏感测试"""
+
+    def test_lowercase_enabled(self):
+        """测试开启大小写转换"""
+        bm25 = BM25(lowercase=True)
+        docs = ["Python is great", "JAVA is heavy"]
+        bm25.fit(docs)
+        
+        # 搜索小写 query 应该能匹配到
+        results = bm25.search("python")
+        assert len(results) > 0
+        assert results[0][0] == 0
+        
+        # 搜索大写 query 也应该匹配
+        results = bm25.search("PYTHON")
+        assert len(results) > 0
+        assert results[0][0] == 0
+
+    def test_lowercase_disabled_by_default(self):
+        """测试默认关闭大小写转换"""
+        bm25 = BM25()
+        docs = ["Python is great"]
+        bm25.fit(docs)
+        
+        # 默认区分大小写，python 不匹配 Python
+        results = bm25.search("python")
+        assert len(results) == 0
+        
+        results = bm25.search("Python")
+        assert len(results) > 0
+
+    def test_mixed_language_lowercase(self):
+        """测试中英文混合的大小写处理"""
+        bm25 = BM25(lowercase=True)
+        docs = ["Python深度学习", "机器学习AI"]
+        bm25.fit(docs)
+        
+        # 英文部分应该不区分大小写，中文部分正常
+        results = bm25.search("python深度学习")
+        assert len(results) > 0
+        assert results[0][0] == 0
+        
+        results = bm25.search("机器学习ai")
+        assert len(results) > 0
+        assert results[0][0] == 1

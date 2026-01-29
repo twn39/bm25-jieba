@@ -56,6 +56,32 @@ def main():
     for i, (doc, score) in enumerate(zip(documents, scores)):
         print(f"  文档 {i}: {score:.4f} - {doc[:30]}...")
 
+    # 大小写不敏感搜索示例
+    print("\n" + "=" * 60)
+    print("大小写不敏感搜索示例 (lowercase=True)")
+    print("=" * 60)
+
+    mixed_documents = [
+        "Python是一种广泛使用的高级编程语言",
+        "JAVA是强类型语言",
+        "Rust拥有极高的性能",
+    ]
+    
+    # 开启大小写转换
+    bm25_lower = BM25(lowercase=True)
+    bm25_lower.fit(mixed_documents)
+    
+    query = "python"  # 小写查询
+    print(f"\n查询: 「{query}」 (文档包含: Python)")
+    print("-" * 40)
+    
+    results = bm25_lower.search(query)
+    if results:
+        for doc_idx, score in results:
+             print(f"  [分数: {score:.4f}] {mixed_documents[doc_idx]}")
+    else:
+        print("  未找到相关文档")
+
 
 if __name__ == "__main__":
     main()

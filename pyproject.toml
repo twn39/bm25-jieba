@@ -1,6 +1,6 @@
 [project]
 name = "bm25-jieba"
-version = "0.1.2"
+version = "0.2.0"
 description = "High-performance BM25 Chinese text search with jieba-rs tokenizer (Rust implementation)"
 readme = "README.md"
 license = { text = "MIT" }

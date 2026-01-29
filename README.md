@@ -13,6 +13,7 @@
 - 🚀 **高性能**: Rust 实现，比纯 Python 快数倍
 - 🔤 **中文分词**: 内置 jieba-rs 分词器
 - 🎯 **精确搜索**: 经典 BM25 算法
+- 🔠 **大小写混合**: 支持大小写不敏感搜索
 - 🐍 **Python 3.11 ~ 3.14**: 支持最新 Python 版本
 
 ## 安装
@@ -50,7 +51,7 @@ for doc_idx, score in results:
 
 ## API 参考
 
-### `BM25(k1=1.5, b=0.75)`
+### `BM25(k1=1.5, b=0.75, lowercase=False)`
 
 创建 BM25 实例。
 
@@ -58,6 +59,7 @@ for doc_idx, score in results:
 |------|------|--------|------|
 | `k1` | float | 1.5 | 词频饱和参数 |
 | `b` | float | 0.75 | 文档长度归一化参数 |
+| `lowercase` | bool | False | 是否将文本转换为小写（大小写不敏感） |
 
 ### `fit(documents: list[str])`
 

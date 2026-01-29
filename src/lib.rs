@@ -19,10 +19,12 @@ static JIEBA: LazyLock<Jieba> = LazyLock::new(Jieba::new);
 /// Args:
 ///     k1: 词频饱和参数，控制词频的影响程度，默认 1.5
 ///     b: 文档长度归一化参数，0 表示不考虑长度，1 表示完全归一化，默认 0.75
+///     lowercase: 是否将文本转换为小写（用于大小写不敏感的英文匹配），默认 false
 #[pyclass]
 pub struct BM25 {
     k1: f64,
     b: f64,
+    lowercase: bool,
     corpus_size: usize,
     avgdl: f64,
     doc_lengths: Vec<usize>,
@@ -34,11 +36,12 @@ pub struct BM25 {
 impl BM25 {
     /// 创建新的 BM25 实例
     #[new]
-    #[pyo3(signature = (k1=1.5, b=0.75))]
-    pub fn new(k1: f64, b: f64) -> Self {
+    #[pyo3(signature = (k1=1.5, b=0.75, lowercase=false))]
+    pub fn new(k1: f64, b: f64, lowercase: bool) -> Self {
         BM25 {
             k1,
             b,
+            lowercase,
             corpus_size: 0,
             avgdl: 0.0,
             doc_lengths: Vec::new(),
@@ -62,7 +65,7 @@ impl BM25 {
 
         for doc in &documents {
             // 使用 jieba 分词
-            let tokens = Self::tokenize(doc);
+            let tokens = self.tokenize(doc);
             let doc_len = tokens.len();
             self.doc_lengths.push(doc_len);
             total_length += doc_len;
@@ -108,7 +111,7 @@ impl BM25 {
     ///     按分数降序排列的 (文档索引, 分数) 元组列表
     #[pyo3(signature = (query, top_k=None))]
     pub fn search(&self, query: &str, top_k: Option<usize>) -> Vec<(usize, f64)> {
-        let query_tokens = Self::tokenize(query);
+        let query_tokens = self.tokenize(query);
 
         // 计算所有文档的分数
         let mut scores: Vec<(usize, f64)> = (0..self.corpus_size)
@@ -135,7 +138,7 @@ impl BM25 {
     /// Returns:
     ///     每个文档的分数列表，索引对应文档顺序
     pub fn get_scores(&self, query: &str) -> Vec<f64> {
-        let query_tokens = Self::tokenize(query);
+        let query_tokens = self.tokenize(query);
         (0..self.corpus_size)
             .map(|i| self.score_document(&query_tokens, i))
             .collect()
@@ -144,11 +147,18 @@ impl BM25 {
 
 impl BM25 {
     /// 使用 jieba 对中文文本进行分词
-    fn tokenize(text: &str) -> Vec<String> {
+    /// 如果 lowercase 为 true，则将分词结果转换为小写
+    fn tokenize(&self, text: &str) -> Vec<String> {
         JIEBA
             .cut(text, false)
             .into_iter()
-            .map(|s| s.to_string())
+            .map(|s| {
+                if self.lowercase {
+                    s.to_lowercase()
+                } else {
+                    s.to_string()
+                }
+            })
             .filter(|s| !s.trim().is_empty())
             .collect()
     }
